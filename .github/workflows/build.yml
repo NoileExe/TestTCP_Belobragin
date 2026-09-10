@@ -1,0 +1,83 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write  # требуется для создания релиза через action-gh-release
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          cache: true
+          cache-key-prefix: 'qt652-win64'
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Deploy
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path deploy | Out-Null
+          Copy-Item build/bin/NetworkClient.exe deploy/
+          Copy-Item build/bin/NetworkServer.exe deploy/
+          windeployqt --release --compiler-runtime --no-translations --dir deploy deploy/NetworkClient.exe
+          windeployqt --release --compiler-runtime --no-translations --dir deploy deploy/NetworkServer.exe
+
+      - name: Add Qt license
+        shell: pwsh
+        run: |
+          curl.exe -sSfL https://raw.githubusercontent.com/qt/qtbase/v6.5.2/LICENSE.LGPLv3 -o deploy/LICENSE_QT.txt
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: Win64
+          path: deploy/
+
+  release:
+    needs: windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: Win64
+          path: Win64
+
+      - name: Zip
+        run: zip -r TestTCP_Belobragin_Win64.zip Win64/*
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: TestTCP_Belobragin_Win64.zip
+          tag_name: ${{ github.ref_name }}
+          name: TestTCP_Belobragin ${{ github.ref_name }}
+          body: |
+            **Windows x64, Qt 6.5.2, без установки.**
+            
+            1. Скачать `TestTCP_Belobragin_Win64.zip`
+            2. Распаковать
+            3. Запустить `NetworkServer.exe`, затем `NetworkClient.exe`
+            
+            Qt 6.5.2 — LGPLv3, см. `LICENSE_QT.txt` в архиве.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

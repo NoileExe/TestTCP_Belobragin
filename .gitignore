@@ -1,0 +1,56 @@
+# Папки сборки
+build/
+build_*/
+*_build/
+out/
+cmake-build-*/
+
+# Объектные файлы и бинарники
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.pdb
+
+# Файлы, генерируемые CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.autogen/
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# Qt Creator
+.qtcreator/
+*.user
+*.user.*
+*.qbs
+*.stash
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.suo
+*.ncb
+*.sdf
+*.opensdf
+
+# CLion
+.idea/
+*.cbp
+
+# Временные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
+*.bak
