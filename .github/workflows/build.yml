@@ -47,7 +47,7 @@ jobs:
       - name: Add Qt license
         shell: pwsh
         run: |
-          curl.exe -sSfL https://raw.githubusercontent.com/qt/qtbase/v6.5.2/LICENSE.LGPLv3 -o deploy/LICENSE_QT.txt
+          curl.exe -sSfL https://raw.githubusercontent.com/qt/qtbase/v6.5.2/LICENSES/LGPL-3.0-only.txt -o deploy/LICENSE_QT.txt
 
       - uses: actions/upload-artifact@v5
         with:
